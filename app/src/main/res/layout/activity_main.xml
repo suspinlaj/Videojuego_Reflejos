@@ -12,11 +12,29 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/fondo"
+            android:src="@drawable/fondo1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- GuideLine para que las nubes no salgan en toda la pantalla-->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guiaNubes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.68" />
+
+        <FrameLayout
+            android:id="@+id/animacion"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guiaNubes"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
         <!-- Guideline vertical centrada para referencia -->
         <androidx.constraintlayout.widget.Guideline
@@ -39,11 +57,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Slimash"
-            android:textColor="@color/rojoOscuro"
-            android:textSize="50sp"
-            android:fontFamily="@font/pixeltitulo"
-            android:gravity="center"
-            android:lineSpacingExtra="4dp"
+            style="@style/Titulo"
             android:layout_marginHorizontal="16dp"
             app:layout_constraintTop_toBottomOf="@id/guide_top"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,11 +68,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Salva al pueblo de los Slimes"
-            android:textColor="@color/rojoOscuro"
-            android:textSize="32sp"
-            android:fontFamily="@font/letra"
-            android:gravity="center"
-            android:lineSpacingExtra="2dp"
+            style="@style/TextoDescriptivo"
             android:layout_marginHorizontal="16dp"
             app:layout_constraintTop_toBottomOf="@id/titulo"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,6 +76,7 @@
 
         <ImageButton
             android:id="@+id/btnVidas"
+            android:onClick="onClickVidas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
@@ -79,6 +90,7 @@
             android:id="@+id/btnPuntuacion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onClickPuntuacion"
             android:background="@android:color/transparent"
             app:srcCompat="@drawable/btnpuntuacion"
             android:layout_marginTop="48dp"
