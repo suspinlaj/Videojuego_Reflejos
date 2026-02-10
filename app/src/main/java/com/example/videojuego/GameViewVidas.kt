@@ -1,6 +1,7 @@
 package com.example.videojuego
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -19,6 +20,11 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     // IMAGENES SLIMES
     private val listaSlimes = ArrayList<Bitmap>()
     private var slimeActual: Bitmap? = null
+    private val margenSlime = 100
+    val margenSuperior = 200   //respetar barra de corazones
+    val margenLateral = 50
+
+
 
     // Hilo del juego
     private var gameThread: Thread? = null
@@ -42,8 +48,15 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     private val tiempoMinimo: Long = 500
     private val reduccionTiempo: Long = 40 // quitar tiempo cada vez que se acierta
 
+    // ACIERTOS
     private var contadorAciertos = 0
     private val aciertosSubirNivel = 5
+
+    // VIDAS
+    private var maxVidas = 5
+    private var vidasActuales = 5
+    private var corazonLleno: Bitmap? = null
+    private var corazonVacio: Bitmap? = null
 
     // Inicializar posiciones
     init {
@@ -73,6 +86,13 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
         // cargar imagen fondo
         imagenFondo = BitmapFactory.decodeResource(resources, R.drawable.fondo2)
 
+        // cargar imagenes vidas
+        val vidasLlenas = BitmapFactory.decodeResource(resources, R.drawable.vidabien)
+        corazonLleno = Bitmap.createScaledBitmap(vidasLlenas, 80, 80, false)
+
+        val vidasVacias = BitmapFactory.decodeResource(resources, R.drawable.vidamal)
+        corazonVacio = Bitmap.createScaledBitmap(vidasVacias, 80, 80, false)
+
     }
 
     // para saber cuando poner en funcionamiento el juego
@@ -100,7 +120,6 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
         }
     }
 
-
     private fun update() {
         // escalar la imagen del fondo
         if (!fondoEscalado && width > 0 && imagenFondo != null) {
@@ -110,7 +129,7 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
         }
 
         // generar slimes
-        if (slimeActual == null) { //  && width > 0
+        if (slimeActual == null && width > 0 && height > 0) {
             generarNuevoSlime()
         }
 
@@ -119,8 +138,15 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
             val tiempoActual = System.currentTimeMillis()
 
             if (tiempoActual - tiempoAparicion > tiempoLimite) {
-                generarNuevoSlime()
+                vidasActuales--
 
+                if (vidasActuales <= 0) {
+                    playing = false
+                    val intent = Intent(context, GamerOverActivity::class.java)
+                    context.startActivity(intent)
+                }
+
+                generarNuevoSlime()
             }
         }
     }
@@ -145,11 +171,12 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
         // posición aleatoria
         slimeActual?.let { bmp ->
             // para que no se salga de pantalla
-            val maxX = width - bmp.width
-            val maxY = height - bmp.height
+            val maxX = width - bmp.width - margenSlime
+            val maxY = height - bmp.height - margenSlime
 
-            figuraX = (Math.random() * (if (maxX > 0) maxX else 1)).toFloat()
-            figuraY = (Math.random() * (if (maxY > 0) maxY else 1)).toFloat()
+            figuraX = (margenLateral + Math.random() * (width - bmp.width - margenLateral * 2)).toFloat()
+            figuraY = (margenSuperior + Math.random() * (height - bmp.height - margenSuperior - margenLateral)).toFloat()
+
         }
         tiempoAparicion = System.currentTimeMillis()
     }
@@ -167,6 +194,24 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
             // poner slime encima del fondo
             slimeActual?.let { bitmap ->
                 canvas.drawBitmap(bitmap, figuraX, figuraY, null)
+            }
+
+            //  BARRA DE VIDA
+            if (corazonLleno != null && corazonVacio != null) {
+
+                for (i in 0 until maxVidas) {
+
+
+                    val posX = 50f + (i * 90)
+                    val posY = 100f // top
+
+                    // poner vida vacia o no
+                    if (i < vidasActuales) {
+                        canvas.drawBitmap(corazonLleno!!, posX, posY, null)
+                    } else {
+                        canvas.drawBitmap(corazonVacio!!, posX, posY, null)
+                    }
+                }
             }
 
             surfaceHolder.unlockCanvasAndPost(canvas)
@@ -192,12 +237,24 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
                         // Reducir tiempo
                         if (tiempoLimite > tiempoMinimo) {
                             tiempoLimite -= reduccionTiempo
-                            println("¡NIVEL SUBIDO! Nuevo tiempo: $tiempoLimite ms")
+                            contadorAciertos = 0
                         }
+                        generarNuevoSlime()
 
-                        contadorAciertos = 0
+                }/*else {
+                    // restar vida si se falla
+                    vidasActuales--
+
+
+                    // si se pierde
+                    if (vidasActuales <= 0) {
+                        // parar el bucve del juego
+                        playing = false
+
+                        val intent = Intent(context, GamerOverActivity::class.java)
+                        context.startActivity(intent)
                     }
-                    generarNuevoSlime()
+                }*/
                 }
             }
         }
