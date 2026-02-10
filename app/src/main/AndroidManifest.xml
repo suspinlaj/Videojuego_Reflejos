@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Videojuego">
         <activity
-            android:name=".GamerOverActivity"
+            android:name=".GameOverActivity"
             android:exported="false" />
         <activity
             android:name=".GameActivity"

@@ -46,7 +46,7 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     private var tiempoAparicion: Long = 0  // tiempo aparición slime actual
     private var tiempoLimite: Long = 2000
     private val tiempoMinimo: Long = 500
-    private val reduccionTiempo: Long = 40 // quitar tiempo cada vez que se acierta
+    private val reduccionTiempo: Long = 70 // quitar tiempo cada vez que se acierta
 
     // ACIERTOS
     private var contadorAciertos = 0
@@ -142,7 +142,7 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
 
                 if (vidasActuales <= 0) {
                     playing = false
-                    val intent = Intent(context, GamerOverActivity::class.java)
+                    val intent = Intent(context, GameOverActivity::class.java)
                     context.startActivity(intent)
                 }
 
@@ -230,6 +230,7 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
                     dedoY >= figuraY && dedoY <= (figuraY + bitmap.height)) {
 
                     contadorAciertos++
+                    generarNuevoSlime()
 
                     // aumentar dificultad si se acierta
                     if (contadorAciertos >= aciertosSubirNivel) {
@@ -239,7 +240,6 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
                             tiempoLimite -= reduccionTiempo
                             contadorAciertos = 0
                         }
-                        generarNuevoSlime()
 
                 }/*else {
                     // restar vida si se falla

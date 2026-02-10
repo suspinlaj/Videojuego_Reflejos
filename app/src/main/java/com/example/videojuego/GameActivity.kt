@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.videojuego.databinding.ActivityGameBinding
 
-class GameActivity : AppCompatActivity() {
+class GameActivity : BaseActivity() {
 
     private lateinit var gameView: GameViewVidas
 
