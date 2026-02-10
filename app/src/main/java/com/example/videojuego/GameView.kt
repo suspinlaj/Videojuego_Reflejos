@@ -10,12 +10,16 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.core.graphics.scale
 
-class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
+class GameView(context: Context) : SurfaceView(context), Runnable{
 
     // IMAGEN FONDO
     private var imagenFondo: Bitmap? = null
-    private var fondoEscalado = false
+    private var fondo4Vidas: Bitmap? = null
+    private var fondo3Vidas: Bitmap? = null
+    private var fondo2Vidas: Bitmap? = null
+    private var fondo1Vida: Bitmap? = null
 
     // IMAGENES SLIMES
     private val listaSlimes = ArrayList<Bitmap>()
@@ -24,7 +28,7 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     val margenSuperior = 200   //respetar barra de corazones
     val margenLateral = 50
 
-
+    private var gameOver = false
 
     // Hilo del juego
     private var gameThread: Thread? = null
@@ -83,16 +87,30 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
             listaSlimes.add(bitmapEscalado)
         }
 
-        // cargar imagen fondo
-        imagenFondo = BitmapFactory.decodeResource(resources, R.drawable.fondo2)
+        // cargar imagenes fondo
+        imagenFondo  = cargarFondo(R.drawable.fondo2)
+        fondo4Vidas  = cargarFondo(R.drawable.fondo4vidas)
+        fondo3Vidas  = cargarFondo(R.drawable.fondo3vidas)
+        fondo2Vidas  = cargarFondo(R.drawable.fondo2vidas)
+        fondo1Vida   = cargarFondo(R.drawable.fondo1vidas)
 
         // cargar imagenes vidas
         val vidasLlenas = BitmapFactory.decodeResource(resources, R.drawable.vidabien)
-        corazonLleno = Bitmap.createScaledBitmap(vidasLlenas, 80, 80, false)
+        corazonLleno = vidasLlenas.scale(80, 80, false)
 
         val vidasVacias = BitmapFactory.decodeResource(resources, R.drawable.vidamal)
-        corazonVacio = Bitmap.createScaledBitmap(vidasVacias, 80, 80, false)
+        corazonVacio = vidasVacias.scale(80, 80, false)
 
+    }
+
+    // para que los fondos ocupen toda la pantalla
+    private fun cargarFondo(resId: Int): Bitmap {
+        val bmp = BitmapFactory.decodeResource(resources, resId)
+        return bmp.scale(
+            resources.displayMetrics.widthPixels,
+            resources.displayMetrics.heightPixels,
+            false
+        )
     }
 
     // para saber cuando poner en funcionamiento el juego
@@ -121,12 +139,6 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     }
 
     private fun update() {
-        // escalar la imagen del fondo
-        if (!fondoEscalado && width > 0 && imagenFondo != null) {
-            // para que ocupe toda la pantalla
-            imagenFondo = Bitmap.createScaledBitmap(imagenFondo!!, width, height, false)
-            fondoEscalado = true
-        }
 
         // generar slimes
         if (slimeActual == null && width > 0 && height > 0) {
@@ -140,7 +152,8 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
             if (tiempoActual - tiempoAparicion > tiempoLimite) {
                 vidasActuales--
 
-                if (vidasActuales <= 0) {
+                if (vidasActuales <= 0 && !gameOver) {
+                    gameOver = true
                     playing = false
                     val intent = Intent(context, GameOverActivity::class.java)
                     context.startActivity(intent)
@@ -182,14 +195,19 @@ class GameViewVidas(context: Context) : SurfaceView(context), Runnable{
     }
 
     private fun draw() {
+        if (gameOver) return   // no dibujar nada si el juego terminó
+
         if (surfaceHolder.surface.isValid) {
             val canvas: Canvas = surfaceHolder.lockCanvas()
 
-            if (imagenFondo != null && fondoEscalado) {
                 canvas.drawBitmap(imagenFondo!!, 0f, 0f, null)
-            } else {
-                canvas.drawColor(Color.GREEN)
-            }
+
+                when (vidasActuales) {
+                    4 -> canvas.drawBitmap(fondo4Vidas!!, 0f, 0f, null)
+                    3 -> canvas.drawBitmap(fondo3Vidas!!, 0f, 0f, null)
+                    2 -> canvas.drawBitmap(fondo2Vidas!!, 0f, 0f, null)
+                    1 -> canvas.drawBitmap(fondo1Vida!!, 0f, 0f, null)
+                }
 
             // poner slime encima del fondo
             slimeActual?.let { bitmap ->

@@ -1,21 +1,19 @@
 package com.example.videojuego
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.example.videojuego.databinding.ActivityGameBinding
 
 class GameActivity : BaseActivity() {
 
-    private lateinit var gameView: GameViewVidas
+    private lateinit var gameView: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Inicializar el juego
-        gameView = GameViewVidas(this)
+        gameView = GameView(this)
         setContentView(gameView)
     }
 
-    // Arranca el juego
+    // Empieza el juego
     override fun onResume() {
         super.onResume()
         gameView.resume()
