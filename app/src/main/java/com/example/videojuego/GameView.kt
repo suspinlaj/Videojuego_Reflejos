@@ -20,6 +20,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var fondo3Vidas: Bitmap? = null
     private var fondo2Vidas: Bitmap? = null
     private var fondo1Vida: Bitmap? = null
+    private var fondosEscalados = false
+
 
     // IMAGENES SLIMES
     private val listaSlimes = ArrayList<Bitmap>()
@@ -139,7 +141,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     private fun update() {
-
+        escalarFondos()
         // generar slimes
         if (slimeActual == null && width > 0 && height > 0) {
             generarNuevoSlime()
@@ -169,6 +171,24 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             Thread.sleep(17)
         } catch (e: InterruptedException) {
             e.printStackTrace()
+        }
+    }
+
+    // para que me salgan bien los fondos
+    private fun escalarFondos() {
+        if (!fondosEscalados && width > 0 && height > 0) {
+            imagenFondo = BitmapFactory.decodeResource(resources, R.drawable.fondo2)
+                .scale(width, height, false)
+            fondo4Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo4vidas)
+                .scale(width, height, false)
+            fondo3Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo3vidas)
+                .scale(width, height, false)
+            fondo2Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo2vidas)
+                .scale(width, height, false)
+            fondo1Vida = BitmapFactory.decodeResource(resources, R.drawable.fondo1vidas)
+                .scale(width, height, false)
+
+            fondosEscalados = true
         }
     }
 
