@@ -75,6 +75,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var puntuacion = 0
     private var puntosPorAcierto = 10
 
+    private var nombreJugador: String = ""
+
     // Imagenes CUENTA ATRAS
     private var img1: Bitmap? = null
     private var img2: Bitmap? = null
@@ -85,8 +87,25 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var numeroCuentaAtras = 3
     private var tiempoCambioNumero: Long = 0
 
-    // Inicializar posiciones
+    // controlar la carga
+    @Volatile
+    private var cargandoRecursos = true
+
+    // iniciar recursos
     init {
+        try {
+            fuentePuntos = resources.getFont(R.font.pixeltitulo)
+        } catch (e: Exception) {
+            paint.typeface = Typeface.DEFAULT_BOLD
+        }
+
+        // cargar y escalar fondos
+        imagenFondo = cargarFondo(R.drawable.fondo2)
+
+    }
+
+    // cargar imagenes no urgentes para que no me pete la app
+    private fun cargarRecursos() {
         // Tamaño dibujos slimes
         val ancho = 180
         val alto = 150
@@ -106,21 +125,17 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         // Bucle para poner el tamaño a todas las imagenes
         for (id in slimes) {
             val bitmapOriginal = BitmapFactory.decodeResource(resources, id)
-            val bitmapEscalado = Bitmap.createScaledBitmap(bitmapOriginal, ancho, alto, false)
+            val bitmapEscalado = bitmapOriginal.scale(ancho, alto, false)
 
             listaSlimes.add(bitmapEscalado)
         }
 
-        // medidas fondo
-        val w = resources.displayMetrics.widthPixels
-        val h = resources.displayMetrics.heightPixels
+        // fondos dependiendo vida
+        fondo4Vidas = cargarFondo(R.drawable.fondo4vidas)
+        fondo3Vidas = cargarFondo(R.drawable.fondo3vidas)
+        fondo2Vidas = cargarFondo(R.drawable.fondo2vidas)
+        fondo1Vida  = cargarFondo(R.drawable.fondo1vidas)
 
-        // cargar y escalar fondos
-        imagenFondo = cargarFondo(R.drawable.fondo2, w, h)
-        fondo4Vidas = cargarFondo(R.drawable.fondo4vidas, w, h)
-        fondo3Vidas = cargarFondo(R.drawable.fondo3vidas, w, h)
-        fondo2Vidas = cargarFondo(R.drawable.fondo2vidas, w, h)
-        fondo1Vida  = cargarFondo(R.drawable.fondo1vidas, w, h)
 
         // cargar imagenes vidas
         val vidasLlenas = BitmapFactory.decodeResource(resources, R.drawable.vidabien)
@@ -129,28 +144,26 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         val vidasVacias = BitmapFactory.decodeResource(resources, R.drawable.vidamal)
         corazonVacio = vidasVacias.scale(80, 80, false)
 
-        fuentePuntos = resources.getFont(R.font.pixeltitulo)
-
 
         // imagenes cuenta atras
         val altoNum = 300
         val anchoNum = 200
 
-        img1 = BitmapFactory.decodeResource(resources, R.drawable.uno)
-            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+        img1 =
+            BitmapFactory.decodeResource(resources, R.drawable.uno).scale(anchoNum, altoNum, false)
 
-        img2 = BitmapFactory.decodeResource(resources, R.drawable.dos)
-            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+        img2 =
+            BitmapFactory.decodeResource(resources, R.drawable.dos).scale(anchoNum, altoNum, false)
 
-        img3 = BitmapFactory.decodeResource(resources, R.drawable.tres)
-            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+        img3 =
+            BitmapFactory.decodeResource(resources, R.drawable.tres).scale(anchoNum, altoNum, false)
 
     }
 
     // cargar fondos bien
-    private fun cargarFondo(resId: Int, w: Int, h: Int): Bitmap {
-        val bmp = BitmapFactory.decodeResource(resources, resId)
-        return Bitmap.createScaledBitmap(bmp, w, h, false)
+
+    private fun cargarFondo(resId: Int): Bitmap {
+        return BitmapFactory.decodeResource(resources, resId)
     }
 
     // para saber cuando poner en funcionamiento el juego
@@ -171,6 +184,17 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     override fun run() {
+        // quitar negrooooooo
+        while (jugando && !surfaceHolder.surface.isValid) {
+            try { Thread.sleep(10) } catch (e: Exception) {}
+        }
+
+        if (jugando) {
+            draw()
+        }
+        cargarRecursos()
+        cargandoRecursos = false
+
         while (jugando) {
             update()
             draw()
@@ -216,6 +240,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                     gameOver = true
                     val intent = Intent(context, GameOverActivity::class.java)
                     intent.putExtra("puntuacion", puntuacion)
+                    intent.putExtra("nombreJugador", nombreJugador)
                     context.startActivity(intent)
                 }
                 generarNuevoSlime()
@@ -231,12 +256,14 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         }
     }
 
-    fun iniciarPartida() {
+    fun iniciarPartida(nombre: String) {
+        this.nombreJugador = nombre
+
         enCuentaAtras = true
         numeroCuentaAtras = 3
         tiempoCambioNumero = System.currentTimeMillis() // resetear reloj para que no me mate nada más empezar
 
-        juegoIniciado = true
+        juegoIniciado = false
     }
 
     // Generar un slime y su posicion aleatoria
@@ -272,14 +299,58 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
             if (surfaceHolder.surface.isValid) {
                 val canvas: Canvas = surfaceHolder.lockCanvas()
-                canvas.drawBitmap(imagenFondo!!, 0f, 0f, null)
+                val pantallaCompleta = android.graphics.Rect(0, 0, width, height)
 
-                when (vidasActuales) {
-                    4 -> canvas.drawBitmap(fondo4Vidas!!, 0f, 0f, null)
-                    3 -> canvas.drawBitmap(fondo3Vidas!!, 0f, 0f, null)
-                    2 -> canvas.drawBitmap(fondo2Vidas!!, 0f, 0f, null)
-                    1 -> canvas.drawBitmap(fondo1Vida!!, 0f, 0f, null)
+                if (imagenFondo != null) {
+                    canvas.drawBitmap(imagenFondo!!, null, pantallaCompleta, null)
                 }
+                val fondoVidas = when (vidasActuales) {
+                    4 -> fondo4Vidas
+                    3 -> fondo3Vidas
+                    2 -> fondo2Vidas
+                    1 -> fondo1Vida
+                    else -> null
+                }
+                fondoVidas?.let {
+                    canvas.drawBitmap(it, null, pantallaCompleta, null)
+                }
+
+                // texto puntuación
+                paint.apply {
+                    color = Color.parseColor("#272727")
+                    textSize = 50f
+                    isAntiAlias = true
+                    typeface = fuentePuntos
+                }
+
+                //  BARRA DE VIDA
+                if (corazonLleno != null && corazonVacio != null) {
+
+                    for (i in 0 until maxVidas) {
+
+                        val posX = 50f + (i * 90)
+                        val posY = 100f // top
+
+                        // poner vida vacia o no
+                        if (i < vidasActuales) {
+                            canvas.drawBitmap(corazonLleno!!, posX, posY, null)
+                        } else {
+                            canvas.drawBitmap(corazonVacio!!, posX, posY, null)
+                        }
+                    }
+                }
+
+                // texto puntuación
+                paint.textAlign = Paint.Align.RIGHT
+
+                canvas.drawText(
+                    "$puntuacion",
+                    width - 60f,   // margen derecho
+                    150f,          // top
+                    paint
+                )
+
+                paint.textAlign = Paint.Align.LEFT
 
                 // dibujar cuenta atras
                 if (enCuentaAtras) {
@@ -302,48 +373,10 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             return
         }
 
-        // texto puntuación
-        paint.apply {
-            color = Color.DKGRAY
-            textSize = 50f
-            isAntiAlias = true
-            typeface = fuentePuntos        }
-
-
-
             // poner slime encima del fondo
             slimeActual?.let { bitmap ->
                 canvas.drawBitmap(bitmap, figuraX, figuraY, null)
             }
-
-            //  BARRA DE VIDA
-            if (corazonLleno != null && corazonVacio != null) {
-
-                for (i in 0 until maxVidas) {
-
-                    val posX = 50f + (i * 90)
-                    val posY = 100f // top
-
-                    // poner vida vacia o no
-                    if (i < vidasActuales) {
-                        canvas.drawBitmap(corazonLleno!!, posX, posY, null)
-                    } else {
-                        canvas.drawBitmap(corazonVacio!!, posX, posY, null)
-                    }
-                }
-            }
-
-            // texto puntuación
-            paint.textAlign = Paint.Align.RIGHT
-
-            canvas.drawText(
-                "$puntuacion",
-                width - 60f,   // margen derecho
-                150f,          // top
-                paint
-            )
-
-            paint.textAlign = Paint.Align.LEFT
 
             surfaceHolder.unlockCanvasAndPost(canvas)
         }

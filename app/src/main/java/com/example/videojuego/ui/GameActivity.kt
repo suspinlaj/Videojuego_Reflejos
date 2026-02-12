@@ -35,34 +35,17 @@ class GameActivity : BaseActivity() {
     }
 
     fun guardarNombre() {
+        supportFragmentManager.setFragmentResultListener(DialogoDatos.CLAVE_PETICION, this) { _, bundle ->
 
-        supportFragmentManager.setFragmentResultListener(
-            DialogoDatos.CLAVE_PETICION,
-            this
-        ) { _, bundle ->
+            val nombreRecibido = bundle.getString(DialogoDatos.CLAVE_RESULTADO)
 
-            val nombre = bundle.getString(DialogoDatos.CLAVE_RESULTADO)
-
-            if (nombre == null) {
+            if (nombreRecibido == null) {
                 finish()
-            }
-            else if (nombre.isEmpty()) {
-                val nuevoJugador = Jugador(
-                    nombre = "Sin Nombre",
-                    puntuacion = 0,
-                    fecha = LocalDate.now()
-                )
-                viewModel.guardar(nuevoJugador)
-                gameView.iniciarPartida()
-            }
-            else {
-                val nuevoJugador = Jugador(
-                    nombre = nombre,
-                    puntuacion = 0,
-                    fecha = LocalDate.now()
-                )
-                viewModel.guardar(nuevoJugador)
-                gameView.iniciarPartida()
+            } else {
+                val nombreJugador = if (nombreRecibido.isEmpty()) "Sin Nombre" else nombreRecibido
+
+                // Pasamos el nombre al juego
+                gameView.iniciarPartida(nombreJugador)
             }
         }
     }

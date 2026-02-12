@@ -4,13 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.videojuego.R
+import com.example.videojuego.data.Jugador
 import com.example.videojuego.databinding.ActivityGamerOverBinding
+import java.time.LocalDate
 
 class GameOverActivity : BaseActivity() {
     private lateinit var binding: ActivityGamerOverBinding
+    private lateinit var viewModel: VistaModeloJugador
     private var puntuacion: Int = 0
+    private var nombreJugador: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,11 +23,24 @@ class GameOverActivity : BaseActivity() {
         val view = binding.root
         setContentView(view)
 
-        puntuacion = intent.getIntExtra("puntuacion", 0)
+        viewModel = ViewModelProvider(this)[VistaModeloJugador::class.java]
 
         binding.descripcion.text = "Puntuación: $puntuacion"
 
+        crearJugador()
         gifDerrota()
+    }
+
+    fun crearJugador() {
+        puntuacion = intent.getIntExtra("puntuacion", 0)
+        nombreJugador = intent.getStringExtra("nombreJugador") ?: "Sin Nombre"
+
+        val jugadorFinal = Jugador(
+            nombre = nombreJugador,
+            puntuacion = puntuacion,
+            fecha = LocalDate.now()
+        )
+        viewModel.guardar(jugadorFinal)
     }
 
     fun gifDerrota() {

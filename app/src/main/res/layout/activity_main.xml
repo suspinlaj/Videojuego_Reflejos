@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:onClick="onClickPuntuacion"
             android:background="@android:color/transparent"
-            app:srcCompat="@drawable/btnhistorial"
+            app:srcCompat="@drawable/btnpuntuacion"
             android:layout_marginTop="48dp"
             app:layout_constraintTop_toBottomOf="@id/btnVidas"
             app:layout_constraintStart_toStartOf="@id/guide_center"
