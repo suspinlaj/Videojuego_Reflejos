@@ -1,4 +1,4 @@
-package com.example.videojuego
+package com.example.videojuego.ui
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -9,6 +9,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.example.videojuego.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -106,7 +107,7 @@ class AnimacionNubes(
             translationX = -itemPixelSize.toFloat()
 
             // Posición vertical aleatoria
-            val posicionImagenRandom = Random.nextInt(container.height - itemPixelSize)
+            val posicionImagenRandom = Random.Default.nextInt(container.height - itemPixelSize)
             translationY = posicionImagenRandom.toFloat()
         }
 
@@ -117,7 +118,7 @@ class AnimacionNubes(
         val endX = container.width.toFloat()
 
         // Duración aleatoria
-        val duration = Random.nextLong(8000, 12000)
+        val duration = Random.Default.nextLong(8000, 12000)
 
         // Animación horizontal
         val moveAnimator = ObjectAnimator.ofFloat(

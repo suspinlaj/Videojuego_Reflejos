@@ -1,4 +1,4 @@
-package com.example.videojuego
+package com.example.videojuego.ui
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -8,6 +8,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
+import com.example.videojuego.R
 import com.example.videojuego.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity() {
@@ -136,7 +137,8 @@ class MainActivity : BaseActivity() {
     }
 
     fun onClickPuntuacion(view: View) {
-
+        val intent = Intent(this, Puntuaciones::class.java)
+        startActivity(intent)
     }
 
 }

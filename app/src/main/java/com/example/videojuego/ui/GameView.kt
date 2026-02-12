@@ -1,4 +1,4 @@
-package com.example.videojuego
+package com.example.videojuego.ui
 
 import android.content.Context
 import android.content.Intent
@@ -10,7 +10,9 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Typeface
 import androidx.core.graphics.scale
+import com.example.videojuego.R
 
 class GameView(context: Context) : SurfaceView(context), Runnable{
 
@@ -20,8 +22,6 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var fondo3Vidas: Bitmap? = null
     private var fondo2Vidas: Bitmap? = null
     private var fondo1Vida: Bitmap? = null
-    private var fondosEscalados = false
-
 
     // IMAGENES SLIMES
     private val listaSlimes = ArrayList<Bitmap>()
@@ -29,15 +29,20 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private val margenSlime = 100
     val margenSuperior = 200   //respetar barra de corazones
     val margenLateral = 50
-
+    private var slimeActualEsEspecial = false
+    
     private var gameOver = false
 
     // Hilo del juego
     private var gameThread: Thread? = null
 
-    // Variable para controlar si estamos jugando
+    // para para controlar el bucle infinito del juego.
     @Volatile
-    private var playing = false
+    private var jugando = false
+
+    // para controlar si estamos jugando
+    @Volatile
+    private var juegoIniciado = false
 
     // Objetos para dibujar
     private val surfaceHolder: SurfaceHolder = holder
@@ -56,13 +61,20 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
     // ACIERTOS
     private var contadorAciertos = 0
-    private val aciertosSubirNivel = 5
+    private var aciertosSubirNivel = 5
+    private var fuentePuntos: Typeface? = null
+
 
     // VIDAS
     private var maxVidas = 5
     private var vidasActuales = 5
     private var corazonLleno: Bitmap? = null
     private var corazonVacio: Bitmap? = null
+
+    // PUNTUACIÓN
+    private var puntuacion = 0
+    private var puntosPorAcierto = 10
+
 
     // Inicializar posiciones
     init {
@@ -77,9 +89,10 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             R.drawable.slime4bien,
             R.drawable.slime5bien,
             R.drawable.slime6bien,
-            R.drawable.slime7bien,
-            R.drawable.slimeespecialbien
+            R.drawable.slime7bien
         )
+
+        val slimeEspecial = R.drawable.slimeespecialbien
 
         // Bucle para poner el tamaño a todas las imagenes
         for (id in slimes) {
@@ -89,12 +102,16 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             listaSlimes.add(bitmapEscalado)
         }
 
-        // cargar imagenes fondo
-        imagenFondo  = cargarFondo(R.drawable.fondo2)
-        fondo4Vidas  = cargarFondo(R.drawable.fondo4vidas)
-        fondo3Vidas  = cargarFondo(R.drawable.fondo3vidas)
-        fondo2Vidas  = cargarFondo(R.drawable.fondo2vidas)
-        fondo1Vida   = cargarFondo(R.drawable.fondo1vidas)
+        // medidas fondo
+        val w = resources.displayMetrics.widthPixels
+        val h = resources.displayMetrics.heightPixels
+
+        // cargar y escalar fondos
+        imagenFondo = cargarFondo(R.drawable.fondo2, w, h)
+        fondo4Vidas = cargarFondo(R.drawable.fondo4vidas, w, h)
+        fondo3Vidas = cargarFondo(R.drawable.fondo3vidas, w, h)
+        fondo2Vidas = cargarFondo(R.drawable.fondo2vidas, w, h)
+        fondo1Vida  = cargarFondo(R.drawable.fondo1vidas, w, h)
 
         // cargar imagenes vidas
         val vidasLlenas = BitmapFactory.decodeResource(resources, R.drawable.vidabien)
@@ -103,28 +120,26 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         val vidasVacias = BitmapFactory.decodeResource(resources, R.drawable.vidamal)
         corazonVacio = vidasVacias.scale(80, 80, false)
 
+        fuentePuntos = resources.getFont(R.font.pixeltitulo)
+
     }
 
-    // para que los fondos ocupen toda la pantalla
-    private fun cargarFondo(resId: Int): Bitmap {
+    // cargar fondos bien
+    private fun cargarFondo(resId: Int, w: Int, h: Int): Bitmap {
         val bmp = BitmapFactory.decodeResource(resources, resId)
-        return bmp.scale(
-            resources.displayMetrics.widthPixels,
-            resources.displayMetrics.heightPixels,
-            false
-        )
+        return Bitmap.createScaledBitmap(bmp, w, h, false)
     }
 
     // para saber cuando poner en funcionamiento el juego
     fun resume() {
-        playing = true
+        jugando = true
         gameThread = Thread(this)
         gameThread?.start()
     }
 
     // Controlar para no gastar bateria si el usuario sale del juego
     fun pause() {
-        playing = false
+        jugando = false
         try {
             gameThread?.join()
         } catch (e: InterruptedException) {
@@ -133,7 +148,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     override fun run() {
-        while (playing) {
+        while (jugando) {
             update()
             draw()
             control()
@@ -141,7 +156,9 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     private fun update() {
-        escalarFondos()
+        // para esperar a que el jugador ponga el nombre
+        if (!juegoIniciado) return
+
         // generar slimes
         if (slimeActual == null && width > 0 && height > 0) {
             generarNuevoSlime()
@@ -156,8 +173,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
                 if (vidasActuales <= 0 && !gameOver) {
                     gameOver = true
-                    playing = false
                     val intent = Intent(context, GameOverActivity::class.java)
+                    intent.putExtra("puntuacion", puntuacion)
                     context.startActivity(intent)
                 }
 
@@ -174,52 +191,51 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         }
     }
 
-    // para que me salgan bien los fondos
-    private fun escalarFondos() {
-        if (!fondosEscalados && width > 0 && height > 0) {
-            imagenFondo = BitmapFactory.decodeResource(resources, R.drawable.fondo2)
-                .scale(width, height, false)
-            fondo4Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo4vidas)
-                .scale(width, height, false)
-            fondo3Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo3vidas)
-                .scale(width, height, false)
-            fondo2Vidas = BitmapFactory.decodeResource(resources, R.drawable.fondo2vidas)
-                .scale(width, height, false)
-            fondo1Vida = BitmapFactory.decodeResource(resources, R.drawable.fondo1vidas)
-                .scale(width, height, false)
-
-            fondosEscalados = true
-        }
+    fun iniciarPartida() {
+        juegoIniciado = true
+        tiempoAparicion = System.currentTimeMillis() // resetear reloj para que no me mate nada más empezar
     }
-
 
     // Generar un slime y su posicion aleatoria
     private fun generarNuevoSlime() {
-        if (listaSlimes.isEmpty()) return
+        val probabilidadEspecial = 5
 
-        // Slime aleatorio
-        val indiceAleatorio = (Math.random() * listaSlimes.size).toInt()
-        slimeActual = listaSlimes[indiceAleatorio]
+        // probabilidad de que salga slime especial
+        val esEspecial = (0..99).random() < probabilidadEspecial
+        slimeActualEsEspecial = esEspecial
 
-        // posición aleatoria
+        slimeActual = if (esEspecial) {
+            // SLIME ESPECIAL
+            val bmp = BitmapFactory.decodeResource(resources, R.drawable.slimeespecialbien)
+            bmp.scale(180, 150, false)
+        } else {
+            // SLIME NORMAL
+            if (listaSlimes.isEmpty()) return
+            val indiceAleatorio = (Math.random() * listaSlimes.size).toInt()
+            listaSlimes[indiceAleatorio]
+        }
+
+        // Posición aleatoria
         slimeActual?.let { bmp ->
-            // para que no se salga de pantalla
-            val maxX = width - bmp.width - margenSlime
-            val maxY = height - bmp.height - margenSlime
-
             figuraX = (margenLateral + Math.random() * (width - bmp.width - margenLateral * 2)).toFloat()
             figuraY = (margenSuperior + Math.random() * (height - bmp.height - margenSuperior - margenLateral)).toFloat()
-
         }
+
         tiempoAparicion = System.currentTimeMillis()
     }
 
     private fun draw() {
         if (gameOver) return   // no dibujar nada si el juego terminó
 
+        // texto puntuación
+        paint.apply {
+            color = Color.DKGRAY
+            textSize = 50f
+            isAntiAlias = true
+            typeface = fuentePuntos        }
+
         if (surfaceHolder.surface.isValid) {
             val canvas: Canvas = surfaceHolder.lockCanvas()
-
                 canvas.drawBitmap(imagenFondo!!, 0f, 0f, null)
 
                 when (vidasActuales) {
@@ -239,7 +255,6 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
                 for (i in 0 until maxVidas) {
 
-
                     val posX = 50f + (i * 90)
                     val posY = 100f // top
 
@@ -252,12 +267,26 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                 }
             }
 
+            // texto puntuación
+            paint.textAlign = Paint.Align.RIGHT
+
+            canvas.drawText(
+                "$puntuacion",
+                width - 60f,   // margen derecho
+                150f,          // top
+                paint
+            )
+
+            paint.textAlign = Paint.Align.LEFT
+
             surfaceHolder.unlockCanvasAndPost(canvas)
         }
     }
 
     // click en la pantalla
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!juegoIniciado) return true
+
         if (event.action == MotionEvent.ACTION_DOWN) {
             val dedoX = event.x
             val dedoY = event.y
@@ -267,7 +296,13 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                 if (dedoX >= figuraX && dedoX <= (figuraX + bitmap.width) &&
                     dedoY >= figuraY && dedoY <= (figuraY + bitmap.height)) {
 
+                    if (slimeActualEsEspecial) {
+                        puntosPorAcierto = 50
+                    }
+
+
                     contadorAciertos++
+                    puntuacion += puntosPorAcierto
                     generarNuevoSlime()
 
                     // aumentar dificultad si se acierta
@@ -279,20 +314,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                             contadorAciertos = 0
                         }
 
-                }/*else {
-                    // restar vida si se falla
-                    vidasActuales--
-
-
-                    // si se pierde
-                    if (vidasActuales <= 0) {
-                        // parar el bucve del juego
-                        playing = false
-
-                        val intent = Intent(context, GamerOverActivity::class.java)
-                        context.startActivity(intent)
                     }
-                }*/
                 }
             }
         }

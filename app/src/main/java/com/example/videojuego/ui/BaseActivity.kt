@@ -1,4 +1,4 @@
-package com.example.videojuego
+package com.example.videojuego.ui
 
 import android.graphics.Color
 import android.os.Bundle
