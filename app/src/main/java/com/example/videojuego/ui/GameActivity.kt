@@ -43,23 +43,30 @@ class GameActivity : BaseActivity() {
 
             val nombre = bundle.getString(DialogoDatos.CLAVE_RESULTADO)
 
-            if (!nombre.isNullOrEmpty()) {
-
+            if (nombre == null) {
+                finish()
+            }
+            else if (nombre.isEmpty()) {
+                val nuevoJugador = Jugador(
+                    nombre = "Sin Nombre",
+                    puntuacion = 0,
+                    fecha = LocalDate.now()
+                )
+                viewModel.guardar(nuevoJugador)
+                gameView.iniciarPartida()
+            }
+            else {
                 val nuevoJugador = Jugador(
                     nombre = nombre,
                     puntuacion = 0,
                     fecha = LocalDate.now()
                 )
-
                 viewModel.guardar(nuevoJugador)
-                // empezar juego cuando el usuario guardo el nombre
                 gameView.iniciarPartida()
-
-            }else {
-                finish()
             }
         }
     }
+
     fun mostrarDialogoNombre() {
 
         // Crear diálogo

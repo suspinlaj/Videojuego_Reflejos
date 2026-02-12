@@ -75,6 +75,15 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var puntuacion = 0
     private var puntosPorAcierto = 10
 
+    // Imagenes CUENTA ATRAS
+    private var img1: Bitmap? = null
+    private var img2: Bitmap? = null
+    private var img3: Bitmap? = null
+
+    // CUENTA ATRÁS
+    private var enCuentaAtras = false
+    private var numeroCuentaAtras = 3
+    private var tiempoCambioNumero: Long = 0
 
     // Inicializar posiciones
     init {
@@ -122,6 +131,20 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
         fuentePuntos = resources.getFont(R.font.pixeltitulo)
 
+
+        // imagenes cuenta atras
+        val altoNum = 300
+        val anchoNum = 200
+
+        img1 = BitmapFactory.decodeResource(resources, R.drawable.uno)
+            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+
+        img2 = BitmapFactory.decodeResource(resources, R.drawable.dos)
+            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+
+        img3 = BitmapFactory.decodeResource(resources, R.drawable.tres)
+            .let { Bitmap.createScaledBitmap(it, anchoNum, altoNum, false) }
+
     }
 
     // cargar fondos bien
@@ -156,6 +179,24 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     private fun update() {
+        // CUENTA ATRÁS
+        if (enCuentaAtras) {
+            val tiempoActual = System.currentTimeMillis()
+
+            if (tiempoActual - tiempoCambioNumero > 1000) {
+                numeroCuentaAtras--
+                tiempoCambioNumero = tiempoActual // resetear el reloj
+
+                if (numeroCuentaAtras <= 0) {
+                    enCuentaAtras = false //quitar cuenta atrás
+                    juegoIniciado = true  // empezar juego
+
+                    tiempoAparicion = System.currentTimeMillis()
+                    generarNuevoSlime()
+                }
+            }
+            return
+        }
         // para esperar a que el jugador ponga el nombre
         if (!juegoIniciado) return
 
@@ -177,7 +218,6 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                     intent.putExtra("puntuacion", puntuacion)
                     context.startActivity(intent)
                 }
-
                 generarNuevoSlime()
             }
         }
@@ -192,8 +232,11 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     }
 
     fun iniciarPartida() {
+        enCuentaAtras = true
+        numeroCuentaAtras = 3
+        tiempoCambioNumero = System.currentTimeMillis() // resetear reloj para que no me mate nada más empezar
+
         juegoIniciado = true
-        tiempoAparicion = System.currentTimeMillis() // resetear reloj para que no me mate nada más empezar
     }
 
     // Generar un slime y su posicion aleatoria
@@ -227,15 +270,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private fun draw() {
         if (gameOver) return   // no dibujar nada si el juego terminó
 
-        // texto puntuación
-        paint.apply {
-            color = Color.DKGRAY
-            textSize = 50f
-            isAntiAlias = true
-            typeface = fuentePuntos        }
-
-        if (surfaceHolder.surface.isValid) {
-            val canvas: Canvas = surfaceHolder.lockCanvas()
+            if (surfaceHolder.surface.isValid) {
+                val canvas: Canvas = surfaceHolder.lockCanvas()
                 canvas.drawBitmap(imagenFondo!!, 0f, 0f, null)
 
                 when (vidasActuales) {
@@ -244,6 +280,36 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                     2 -> canvas.drawBitmap(fondo2Vidas!!, 0f, 0f, null)
                     1 -> canvas.drawBitmap(fondo1Vida!!, 0f, 0f, null)
                 }
+
+                // dibujar cuenta atras
+                if (enCuentaAtras) {
+                    val imagenADibujar = when (numeroCuentaAtras) {
+                        3 -> img3
+                        2 -> img2
+                        1 -> img1
+                        else -> null
+                    }
+
+            imagenADibujar?.let { bmp ->
+                // centrar imagen
+                val xCentro = (width / 2f) - (bmp.width / 2f)
+                val yCentro = (height / 2f) - (bmp.height / 2f)
+
+                canvas.drawBitmap(bmp, xCentro, yCentro, null)
+            }
+
+            surfaceHolder.unlockCanvasAndPost(canvas)
+            return
+        }
+
+        // texto puntuación
+        paint.apply {
+            color = Color.DKGRAY
+            textSize = 50f
+            isAntiAlias = true
+            typeface = fuentePuntos        }
+
+
 
             // poner slime encima del fondo
             slimeActual?.let { bitmap ->

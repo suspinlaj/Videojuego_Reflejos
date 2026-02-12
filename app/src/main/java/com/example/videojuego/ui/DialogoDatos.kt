@@ -23,15 +23,12 @@ class DialogoDatos : DialogFragment() {
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle("Guardar nombre")
             .setView(editText)
-            .setNegativeButton("Guardar") { _, _ ->
-                val nombre = editText.text.toString()
-                setFragmentResult(
-                    CLAVE_PETICION,
-                    bundleOf(CLAVE_RESULTADO to nombre)
-                )
+            .setNegativeButton("Cancelar") { _, _ ->
+                setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to null))
             }
-            .setPositiveButton("Cancelar") { _, _ ->
-                setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to ""))
+            .setPositiveButton("Guardar") { _, _ ->
+                val nombre = editText.text.toString()
+                setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to nombre))
             }
             .create()
     }
