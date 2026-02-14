@@ -2,11 +2,14 @@ package com.example.videojuego.ui
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
 import android.widget.EditText
+import com.google.android.material.textfield.TextInputEditText
+import com.example.videojuego.R
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class DialogoDatos : DialogFragment() {
 
@@ -15,21 +18,35 @@ class DialogoDatos : DialogFragment() {
         const val CLAVE_RESULTADO = "NombreUsuario"
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        dialog?.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val editText = EditText(requireContext())
-        editText.hint = "Introduce tu nombre"
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialogo_personalizado)
 
-        return MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Guardar nombre")
-            .setView(editText)
-            .setNegativeButton("Cancelar") { _, _ ->
-                setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to null))
-            }
-            .setPositiveButton("Guardar") { _, _ ->
-                val nombre = editText.text.toString()
-                setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to nombre))
-            }
-            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val editText = dialog.findViewById<TextInputEditText>(R.id.etNombre)
+
+        dialog.findViewById<View>(R.id.btnCancelar)?.setOnClickListener {
+            setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to null))
+            dismiss()
+        }
+
+        dialog.findViewById<View>(R.id.btnGuardar)?.setOnClickListener {
+            val nombre = editText.text.toString()
+            setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to nombre))
+            dismiss()        }
+
+        return dialog
     }
+
 }
