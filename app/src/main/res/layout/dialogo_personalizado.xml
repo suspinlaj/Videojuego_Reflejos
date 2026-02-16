@@ -1,47 +1,52 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@drawable/fondodialog">
+    android:background="@drawable/imgdialog">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Introduzca su nombre"
         android:fontFamily="@font/pixeltitulo"
-        android:textSize="14sp"
-        android:textColor="@color/rojoOscuro"
-        android:gravity="center"
-        android:layout_marginTop="20dp"
+        style="@style/DialogoTitulo"
+        android:layout_marginTop="38dp"
         android:paddingBottom="12dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:hintEnabled="false"
+        app:boxBackgroundMode="none"
+        app:boxStrokeWidth="0dp"
+        android:layout_marginTop="8dp"
+        app:boxStrokeWidthFocused="0dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etNombre"
+            android:id="@+id/edtNombre"
+            style="@style/DialogoEntry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:fontFamily="@font/letra"/>
+            android:layout_marginStart="60dp"
+            android:layout_marginEnd="60dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
-        android:paddingTop="16dp">
+        android:layout_marginTop="8dp">
 
         <Button
             style="@style/DialogoBoton"
             android:id="@+id/btnGuardar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:text="Guardar"/>
 
         <Button
@@ -49,7 +54,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancelar"
-            android:background="@android:color/transparent"
             style="@style/DialogoBoton" />
 
 

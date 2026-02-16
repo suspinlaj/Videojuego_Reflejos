@@ -18,11 +18,13 @@ class DialogoDatos : DialogFragment() {
         const val CLAVE_RESULTADO = "NombreUsuario"
     }
 
+
     override fun onStart() {
         super.onStart()
 
+        // hacer el dialog más pequeño o grande
         dialog?.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            (resources.displayMetrics.widthPixels * 0.85).toInt(),
             WindowManager.LayoutParams.WRAP_CONTENT
         )
     }
@@ -34,7 +36,7 @@ class DialogoDatos : DialogFragment() {
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        val editText = dialog.findViewById<TextInputEditText>(R.id.etNombre)
+        val editText = dialog.findViewById<TextInputEditText>(R.id.edtNombre)
 
         dialog.findViewById<View>(R.id.btnCancelar)?.setOnClickListener {
             setFragmentResult(CLAVE_PETICION, bundleOf(CLAVE_RESULTADO to null))

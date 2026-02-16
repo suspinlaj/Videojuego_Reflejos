@@ -5,4 +5,6 @@
 
     <color name="rojoOscuro">#3a1715</color>
     <color name="grisOscuro">#131313</color>
+    <color name="rojo">#761514</color>
+    <color name="rojoClaro">#b61e1e</color>
 </resources>

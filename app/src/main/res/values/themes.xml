@@ -34,10 +34,10 @@
         <item name="buttonBarNegativeButtonStyle">@style/DialogoBoton</item>
     </style>
 
-    <style name="DialogoTitulo" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+    <style name="DialogoTitulo">
         <item name="android:fontFamily">@font/pixeltitulo</item>
-        <item name="android:textSize">10sp</item>
-        <item name="android:textColor">@color/rojoOscuro</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/rojo</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -45,7 +45,17 @@
         <item name="android:fontFamily">@font/pixeltitulo</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/rojoClaro</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="DialogoEntry">
+        <item name="android:background">@color/white</item>
         <item name="android:textColor">@color/rojoOscuro</item>
+        <item name="android:maxLength">15</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:fontFamily">@font/letra</item>
+        <item name="android:inputType">textVisiblePassword|textNoSuggestions</item>
     </style>
 
 
