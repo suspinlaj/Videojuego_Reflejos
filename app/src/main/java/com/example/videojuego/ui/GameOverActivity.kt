@@ -25,6 +25,9 @@ class GameOverActivity : BaseActivity() {
 
         viewModel = ViewModelProvider(this)[VistaModeloJugador::class.java]
 
+        puntuacion = intent.getIntExtra("puntuacion", 0)
+        nombreJugador = intent.getStringExtra("nombreJugador") ?: "Sin Nombre"
+
         binding.descripcion.text = "Puntuación: $puntuacion"
 
         crearJugador()
@@ -32,8 +35,6 @@ class GameOverActivity : BaseActivity() {
     }
 
     fun crearJugador() {
-        puntuacion = intent.getIntExtra("puntuacion", 0)
-        nombreJugador = intent.getStringExtra("nombreJugador") ?: "Sin Nombre"
 
         val jugadorFinal = Jugador(
             nombre = nombreJugador,

@@ -6,8 +6,9 @@ import java.time.LocalDate
 
 @Entity(tableName = "jugadores")
 data class Jugador(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val nombre : String,
     val puntuacion : Int,
-    @PrimaryKey
     val fecha : LocalDate
 )
