@@ -64,8 +64,8 @@ class GameOverActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        //música al entrar o volver a la pantallan un seg despues
-        handlerMusica.postDelayed(runnableMusica, 2000)
+        //música al entrar o volver a la pantallan seg despues
+        handlerMusica.postDelayed(runnableMusica, 1000)
 
     }
 
@@ -89,7 +89,6 @@ class GameOverActivity : BaseActivity() {
         val volumen = 0.1f
         mediaPlayer?.setVolume(volumen, volumen)
 
-        mediaPlayer?.start()
     }
 
     //  parar música al salir

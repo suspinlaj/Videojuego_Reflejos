@@ -11,6 +11,8 @@ import android.view.SurfaceView
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
+import android.media.AudioAttributes
+import android.media.SoundPool
 import androidx.core.graphics.scale
 import com.example.videojuego.R
 
@@ -87,6 +89,11 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var numeroCuentaAtras = 3
     private var tiempoCambioNumero: Long = 0
 
+    // SONIDOS
+    private var soundPool: SoundPool? = null
+    private var sonidoEspecialId: Int = 0
+    private var sonidoPerderId: Int = 0
+
     // controlar la carga
     @Volatile
     private var cargandoRecursos = true
@@ -101,6 +108,22 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
         // cargar y escalar fondos
         imagenFondo = cargarFondo(R.drawable.fondo2)
+
+        // SONIDOS
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        // soinar hasta 5 efectos a la vez sin cortarse
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(5)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        // Cargar audios
+        sonidoEspecialId = soundPool?.load(context, R.raw.victoria, 1) ?: 0
+        sonidoPerderId = soundPool?.load(context, R.raw.derrota, 1) ?: 0
 
     }
 
@@ -235,6 +258,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
             if (tiempoActual - tiempoAparicion > tiempoLimite) {
                 vidasActuales--
+                soundPool?.play(sonidoPerderId, 1f, 1f, 0, 0, 1f)
 
                 if (vidasActuales <= 0 && !gameOver) {
                     gameOver = true
@@ -246,6 +270,11 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                 generarNuevoSlime()
             }
         }
+    }
+
+    fun destruirSonidos() {
+        soundPool?.release()
+        soundPool = null
     }
 
     private fun control() {
@@ -395,24 +424,30 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                 if (dedoX >= figuraX && dedoX <= (figuraX + bitmap.width) &&
                     dedoY >= figuraY && dedoY <= (figuraY + bitmap.height)) {
 
+                    val tiempoRestante = tiempoLimite - (System.currentTimeMillis() - tiempoAparicion)
+
+                    //Puntos = Base + (TiempoRestante * Multiplicador)
+                    val puntosBase = if (slimeActualEsEspecial) 50 else 10
+                    val multiplicador = 0.05f
+
+                    puntosPorAcierto = (puntosBase + (tiempoRestante * multiplicador)).toInt()
+
+                    puntuacion += puntosPorAcierto
+
                     if (slimeActualEsEspecial) {
-                        puntosPorAcierto = 50
+                        soundPool?.play(sonidoEspecialId, 1f, 1f, 0, 0, 1f)
                     }
 
-
                     contadorAciertos++
-                    puntuacion += puntosPorAcierto
                     generarNuevoSlime()
 
-                    // aumentar dificultad si se acierta
+                    // aumentar dificultad
                     if (contadorAciertos >= aciertosSubirNivel) {
-
                         // Reducir tiempo
                         if (tiempoLimite > tiempoMinimo) {
                             tiempoLimite -= reduccionTiempo
                             contadorAciertos = 0
                         }
-
                     }
                 }
             }

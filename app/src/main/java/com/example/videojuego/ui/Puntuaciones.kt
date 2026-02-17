@@ -88,7 +88,7 @@ class Puntuaciones : BaseActivity() {
     override fun onStart() {
         super.onStart()
         //música al entrar o volver a la pantallan un seg despues
-        handlerMusica.postDelayed(runnableMusica, 2000)
+        handlerMusica.postDelayed(runnableMusica, 1000)
 
     }
 
@@ -112,7 +112,6 @@ class Puntuaciones : BaseActivity() {
         val volumen = 0.7f
         mediaPlayer?.setVolume(volumen, volumen)
 
-        mediaPlayer?.start()
     }
 
     //  parar música al salir
