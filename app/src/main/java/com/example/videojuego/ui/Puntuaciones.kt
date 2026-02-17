@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.example.videojuego.R
 import com.example.videojuego.data.Jugador
 import com.example.videojuego.databinding.ActivityPuntuacionesBinding
@@ -20,6 +21,8 @@ class Puntuaciones : BaseActivity() {
     private val listaJugadores = mutableListOf<Jugador>()
     private lateinit var adaptador: AdaptadorPuntuaciones //adaptador personalizado
 
+    private var animacionNubes: AnimacionNubes? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPuntuacionesBinding.inflate(layoutInflater)
@@ -29,6 +32,7 @@ class Puntuaciones : BaseActivity() {
         binding.listViewPuntuaciones.adapter = adaptador
 
         cargarDatos()
+        animacionPortada()
     }
 
     private fun cargarDatos() {
@@ -36,7 +40,7 @@ class Puntuaciones : BaseActivity() {
             listaJugadores.clear()
 
             // obtener top 5
-            val top5Jugadores = jugadoresBD.sortedByDescending { it.puntuacion }.take(5)
+            val top5Jugadores = jugadoresBD.sortedByDescending { it.puntuacion }.take(10)
 
             // añadir solo los 5 jugadores
             listaJugadores.addAll(top5Jugadores)
@@ -45,32 +49,32 @@ class Puntuaciones : BaseActivity() {
         })
     }
 
-    inner class AdaptadorPuntuaciones(context: Context, private val datos: List<Jugador>) :
-        ArrayAdapter<Jugador>(context, 0, datos) {
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            var vistaFila = convertView
-
-            if (vistaFila == null) {
-                vistaFila = LayoutInflater.from(context).inflate(R.layout.lista_puntuaciones, parent, false)
-            }
-
-            val jugadorActual = datos[position]
-
-            val tvNombrePuntos = vistaFila!!.findViewById<TextView>(R.id.tvNombrePuntos)
-            val tvFecha = vistaFila.findViewById<TextView>(R.id.tvFecha)
-
-            // DATOS
-            tvNombrePuntos.text = "${jugadorActual.nombre} - ${jugadorActual.puntuacion} pts"
-
-            // FECHA
-            val formateador = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-            val fechaAlReves = jugadorActual.fecha.format(formateador)
-
-            tvFecha.text = "$fechaAlReves"
-
-            return vistaFila
-        }
+    fun onClickAtras(view : View) {
+        finish()
     }
+
+    private fun animacionPortada() {
+
+        val listaImagenes = listOf(
+            R.drawable.nube1,
+            R.drawable.nube2,
+            R.drawable.nube3,
+            R.drawable.nube4,
+            R.drawable.nube5,
+            R.drawable.nube6,
+            R.drawable.nube7,
+            R.drawable.nube8,
+            R.drawable.nube9
+        )
+
+        animacionNubes = AnimacionNubes(
+            container = binding.animacion,
+            scope = lifecycleScope,
+            imagenes = listaImagenes
+        )
+
+        // Conectar la animación al ciclo de vida
+        lifecycle.addObserver(animacionNubes!!)
+    }
+
 }
