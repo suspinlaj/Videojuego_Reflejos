@@ -3,7 +3,10 @@ package com.example.videojuego.ui
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
@@ -15,6 +18,9 @@ class MainActivity : BaseActivity() {
     private lateinit var binding: ActivityMainBinding
     private var respirarAnimacion: AnimatorSet? = null
     private var animacionNubes: AnimacionNubes? = null
+    private var mediaPlayer: MediaPlayer? = null
+    private val handlerMusica = Handler(Looper.getMainLooper())
+    private val runnableMusica = Runnable { mediaPlayer?.start() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,17 +28,24 @@ class MainActivity : BaseActivity() {
         val view = binding.root
         setContentView(view)
         animacionPortada()
+        reproducirAudioInicio()
     }
 
 
     override fun onStart() {
         super.onStart()
         respirarAnimacion = animacionPersonaje(binding.imgPersonaje)
+        //música al entrar o volver a la pantalla
+        handlerMusica.postDelayed(runnableMusica, 1000)
     }
 
     // para que se pare la animación al cambiar la pantalla
     override fun onStop() {
         super.onStop()
+
+        //cancelar temp musica
+        handlerMusica.removeCallbacks(runnableMusica)
+
         respirarAnimacion?.cancel()
         respirarAnimacion = null
 
@@ -42,6 +55,9 @@ class MainActivity : BaseActivity() {
             scaleY = 1f
             translationY = 0f
         }
+
+        // parar musica
+        mediaPlayer?.pause()
     }
 
     private fun animacionPersonaje(imageView: ImageView): AnimatorSet {
@@ -130,6 +146,25 @@ class MainActivity : BaseActivity() {
         lifecycle.addObserver(animacionNubes!!)
     }
 
+    private fun reproducirAudioInicio() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.inicio)
+
+        // repetir en bucle infinito
+        mediaPlayer?.isLooping = true
+
+        // ajutar el volumen a lo que quiero
+        val volumen = 0.3f
+        mediaPlayer?.setVolume(volumen, volumen)
+
+    }
+
+    //  parar música al salir
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
 
     fun onClickVidas(view: View) {
         val intent = Intent(this, GameActivity::class.java)

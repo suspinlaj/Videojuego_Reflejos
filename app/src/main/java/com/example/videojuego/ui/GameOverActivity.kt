@@ -1,7 +1,10 @@
 package com.example.videojuego.ui
 
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +17,11 @@ import java.time.LocalDate
 class GameOverActivity : BaseActivity() {
     private lateinit var binding: ActivityGamerOverBinding
     private lateinit var viewModel: VistaModeloJugador
+
+    private var mediaPlayer: MediaPlayer? = null
+
+    private val handlerMusica = Handler(Looper.getMainLooper())
+    private val runnableMusica = Runnable { mediaPlayer?.start() }
     private var puntuacion: Int = 0
     private var nombreJugador: String = ""
 
@@ -32,6 +40,7 @@ class GameOverActivity : BaseActivity() {
 
         crearJugador()
         gifDerrota()
+        reproducirAudioInicio()
     }
 
     fun crearJugador() {
@@ -51,6 +60,44 @@ class GameOverActivity : BaseActivity() {
             .asGif()
             .load(R.raw.gifderrota)
             .into(gifImagenView)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //música al entrar o volver a la pantallan un seg despues
+        handlerMusica.postDelayed(runnableMusica, 2000)
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        //cancelar temp musica
+        handlerMusica.removeCallbacks(runnableMusica)
+
+        // parar musica
+        mediaPlayer?.pause()
+    }
+
+    private fun reproducirAudioInicio() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.gameover)
+
+        // repetir en bucle infinito
+        mediaPlayer?.isLooping = true
+
+        // ajutar el volumen a lo que quiero
+        val volumen = 0.1f
+        mediaPlayer?.setVolume(volumen, volumen)
+
+        mediaPlayer?.start()
+    }
+
+    //  parar música al salir
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     fun onClickVolver(view: View) {

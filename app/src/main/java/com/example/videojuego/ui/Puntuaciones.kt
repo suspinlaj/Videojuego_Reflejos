@@ -1,7 +1,10 @@
 package com.example.videojuego.ui
 
 import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +21,10 @@ import java.time.format.DateTimeFormatter
 class Puntuaciones : BaseActivity() {
     private lateinit var binding: ActivityPuntuacionesBinding
     private val vistaModelo: VistaModeloJugador by viewModels()
+    private var mediaPlayer: MediaPlayer? = null
+
+    private val handlerMusica = Handler(Looper.getMainLooper())
+    private val runnableMusica = Runnable { mediaPlayer?.start() }
     private val listaJugadores = mutableListOf<Jugador>()
     private lateinit var adaptador: AdaptadorPuntuaciones //adaptador personalizado
 
@@ -33,6 +40,7 @@ class Puntuaciones : BaseActivity() {
 
         cargarDatos()
         animacionPortada()
+        reproducirAudioInicio()
     }
 
     private fun cargarDatos() {
@@ -77,4 +85,41 @@ class Puntuaciones : BaseActivity() {
         lifecycle.addObserver(animacionNubes!!)
     }
 
+    override fun onStart() {
+        super.onStart()
+        //música al entrar o volver a la pantallan un seg despues
+        handlerMusica.postDelayed(runnableMusica, 2000)
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        //cancelar temp musica
+        handlerMusica.removeCallbacks(runnableMusica)
+
+        // parar musica
+        mediaPlayer?.pause()
+    }
+
+    private fun reproducirAudioInicio() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.puntuacion)
+
+        // repetir en bucle infinito
+        mediaPlayer?.isLooping = true
+
+        // ajutar el volumen a lo que quiero
+        val volumen = 0.7f
+        mediaPlayer?.setVolume(volumen, volumen)
+
+        mediaPlayer?.start()
+    }
+
+    //  parar música al salir
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
 }

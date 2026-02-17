@@ -52,7 +52,7 @@
     <style name="DialogoEntry">
         <item name="android:background">@color/white</item>
         <item name="android:textColor">@color/rojoOscuro</item>
-        <item name="android:maxLength">10</item>
+        <item name="android:maxLength">8</item>
         <item name="android:textSize">30sp</item>
         <item name="android:fontFamily">@font/letra</item>
         <item name="android:inputType">textVisiblePassword|textNoSuggestions</item>

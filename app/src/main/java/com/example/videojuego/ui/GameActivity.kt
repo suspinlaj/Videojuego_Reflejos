@@ -1,13 +1,21 @@
 package com.example.videojuego.ui
 
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.ViewModelProvider
+import com.example.videojuego.R
 import com.example.videojuego.data.Jugador
 import java.time.LocalDate
 
 class GameActivity : BaseActivity() {
     private lateinit var gameView: GameView
     private lateinit var viewModel: VistaModeloJugador
+    private var mediaPlayer: MediaPlayer? = null
+
+    private val handlerMusica = Handler(Looper.getMainLooper())
+    private val runnableMusica = Runnable { mediaPlayer?.start() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,8 +27,46 @@ class GameActivity : BaseActivity() {
         setContentView(gameView)
 
         guardarNombre()
-
+        reproducirAudioInicio()
         mostrarDialogoNombre()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //música al entrar o volver a la pantallan un seg despues
+        handlerMusica.postDelayed(runnableMusica, 2000)
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        //cancelar temp musica
+        handlerMusica.removeCallbacks(runnableMusica)
+
+        // parar musica
+        mediaPlayer?.pause()
+    }
+
+    private fun reproducirAudioInicio() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.juego)
+
+        // repetir en bucle infinito
+        mediaPlayer?.isLooping = true
+
+        // ajutar el volumen a lo que quiero
+        val volumen = 0.1f
+        mediaPlayer?.setVolume(volumen, volumen)
+
+        mediaPlayer?.start()
+    }
+
+    //  parar música al salir
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     override fun onResume() {
