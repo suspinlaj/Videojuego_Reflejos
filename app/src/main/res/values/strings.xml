@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Videojuego</string>
+    <string name="app_name">Slimash</string>
+
+    <!-- poner colores solo a los num de las instrucciones -->
+    <string name="texto_instrucciones"><![CDATA[
+        <b><font color="#761514">1.</font></b> Toca los slimes lo más rápido que puedas antes de que desaparezcan.<br><br>
+        <b><font color="#761514">2.</font></b> ¡Cuidado! Tienes 5 vidas. Si un slime huye, pierdes una.<br><br>
+        <b><font color="#761514">3.</font></b> El Slime Multicolor da más puntos.<br><br>
+        <b><font color="#761514">4.</font></b> ¡La velocidad aumenta cada 5 aciertos!
+    ]]></string>
 </resources>

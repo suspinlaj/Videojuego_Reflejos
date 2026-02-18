@@ -35,6 +35,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <ImageButton
+            android:id="@+id/btnManual"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="16dp"
+            android:onClick="onClickManual"
+            app:srcCompat="@drawable/interrogacion"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
         <!-- Guideline vertical centrada para referencia -->
         <androidx.constraintlayout.widget.Guideline

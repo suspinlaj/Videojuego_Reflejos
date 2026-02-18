@@ -21,12 +21,17 @@ class DialogoDatos : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        val window = dialog?.window
 
         // hacer el dialog más pequeño o grande
         dialog?.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.85).toInt(),
             WindowManager.LayoutParams.WRAP_CONTENT
         )
+
+        //oscurecer el fondo al abrir el dialog
+        window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        window?.setDimAmount(0.8f)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

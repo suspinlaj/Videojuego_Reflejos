@@ -31,6 +31,15 @@ class MainActivity : BaseActivity() {
         reproducirAudioInicio()
     }
 
+    fun onClickManual(view: View) {
+            // Crear diálogo
+            val dialogo = DialogManual()
+
+            // Mostrar diálogo
+            dialogo.show(supportFragmentManager, null)
+
+    }
+
 
     override fun onStart() {
         super.onStart()

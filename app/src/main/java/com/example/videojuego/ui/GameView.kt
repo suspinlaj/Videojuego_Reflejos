@@ -26,7 +26,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var fondo1Vida: Bitmap? = null
 
     // IMAGENES SLIMES
-    private val listaSlimes = ArrayList<Bitmap>()
+    private val listaSlimesBien = ArrayList<Bitmap>()
+    private val listaSlimesMal = ArrayList<Bitmap>()
     private var slimeActual: Bitmap? = null
     private val margenSlime = 100
     val margenSuperior = 200   //respetar barra de corazones
@@ -55,11 +56,15 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var figuraY = 0f
     private var radio = 100f // Tamaño figura
 
+    private var indiceSlimeActual: Int = -1 //  número de slime de la lista
+    private var slimeGolpeado = false       // si está en la animación de morir
+    private var tiempoGolpe: Long = 0       // segundo de espera
+
     // TIEMPO
     private var tiempoAparicion: Long = 0  // tiempo aparición slime actual
     private var tiempoLimite: Long = 2000
     private val tiempoMinimo: Long = 500
-    private val reduccionTiempo: Long = 70 // quitar tiempo cada vez que se acierta
+    private val reduccionTiempo: Long = 60 // quitar tiempo cada vez que se acierta
 
     // ACIERTOS
     private var contadorAciertos = 0
@@ -133,7 +138,8 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         val ancho = 180
         val alto = 150
 
-        val slimes = listOf(
+        // SLIMES BIEN
+        val slimesBien = listOf(
             R.drawable.slime1bien,
             R.drawable.slime2bien,
             R.drawable.slime3bien,
@@ -143,15 +149,37 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             R.drawable.slime7bien
         )
 
-        val slimeEspecial = R.drawable.slimeespecialbien
+        val slimeEspecialBien = R.drawable.slimeespecialbien
 
         // Bucle para poner el tamaño a todas las imagenes
-        for (id in slimes) {
+        for (id in slimesBien) {
             val bitmapOriginal = BitmapFactory.decodeResource(resources, id)
             val bitmapEscalado = bitmapOriginal.scale(ancho, alto, false)
 
-            listaSlimes.add(bitmapEscalado)
+            listaSlimesBien.add(bitmapEscalado)
         }
+
+        // SLIMES MAL
+        val slimesMal = listOf(
+            R.drawable.slime1mal,
+            R.drawable.slime2mal,
+            R.drawable.slime3mal,
+            R.drawable.slime4mal,
+            R.drawable.slime5mal,
+            R.drawable.slime6mal,
+            R.drawable.slime7mal
+        )
+
+        val slimeEspecialMal = R.drawable.slimeespecialmal
+
+        // Bucle para poner el tamaño a todas las imagenes
+        for (id in slimesMal) {
+            val bitmapOriginal = BitmapFactory.decodeResource(resources, id)
+            val bitmapEscalado = bitmapOriginal.scale(ancho, alto, false)
+
+            listaSlimesMal.add(bitmapEscalado)
+        }
+
 
         // fondos dependiendo vida
         fondo4Vidas = cargarFondo(R.drawable.fondo4vidas)
@@ -247,6 +275,15 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         // para esperar a que el jugador ponga el nombre
         if (!juegoIniciado) return
 
+        // comprobar slime aplastado
+        if (slimeGolpeado) {
+            val tiempoActual = System.currentTimeMillis()
+            if (tiempoActual - tiempoGolpe > 1000) {
+                generarNuevoSlime()
+            }
+            return
+        }
+
         // generar slimes
         if (slimeActual == null && width > 0 && height > 0) {
             generarNuevoSlime()
@@ -297,22 +334,26 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
     // Generar un slime y su posicion aleatoria
     private fun generarNuevoSlime() {
+        slimeGolpeado = false
         val probabilidadEspecial = 5
 
         // probabilidad de que salga slime especial
         val esEspecial = (0..99).random() < probabilidadEspecial
         slimeActualEsEspecial = esEspecial
 
-        slimeActual = if (esEspecial) {
+        slimeActual = (if (esEspecial) {
+            indiceSlimeActual = -1
             // SLIME ESPECIAL
             val bmp = BitmapFactory.decodeResource(resources, R.drawable.slimeespecialbien)
             bmp.scale(180, 150, false)
         } else {
             // SLIME NORMAL
-            if (listaSlimes.isEmpty()) return
-            val indiceAleatorio = (Math.random() * listaSlimes.size).toInt()
-            listaSlimes[indiceAleatorio]
-        }
+            if (listaSlimesBien.isEmpty()) return
+
+            // guardar indice
+            indiceSlimeActual = (Math.random() * listaSlimesBien.size).toInt()
+            slimeActual = listaSlimesBien[indiceSlimeActual]
+        }) as Bitmap?
 
         // Posición aleatoria
         slimeActual?.let { bmp ->
@@ -413,7 +454,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
 
     // click en la pantalla
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!juegoIniciado) return true
+        if (!juegoIniciado || slimeGolpeado) return true
 
         if (event.action == MotionEvent.ACTION_DOWN) {
             val dedoX = event.x
@@ -438,14 +479,26 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                         soundPool?.play(sonidoEspecialId, 1f, 1f, 0, 0, 1f)
                     }
 
+                    slimeGolpeado = true
+                    tiempoGolpe = System.currentTimeMillis()
+
+                    if (slimeActualEsEspecial) {
+                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.slimeespecialmal)
+                        slimeActual = bmp.scale(180, 150, false)
+                    } else {
+                        // Buscar mismo slime que estaba bien, pero en la lista mal
+                        if (indiceSlimeActual != -1 && indiceSlimeActual < listaSlimesMal.size) {
+                            slimeActual = listaSlimesMal[indiceSlimeActual]
+                        }
+                    }
+
                     contadorAciertos++
-                    generarNuevoSlime()
 
                     // aumentar dificultad
                     if (contadorAciertos >= aciertosSubirNivel) {
                         // Reducir tiempo
                         if (tiempoLimite > tiempoMinimo) {
-                            tiempoLimite -= reduccionTiempo
+                            tiempoLimite -= (tiempoLimite * reduccionTiempo) / 100
                             contadorAciertos = 0
                         }
                     }
