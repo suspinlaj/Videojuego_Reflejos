@@ -55,7 +55,7 @@ class GameActivity : BaseActivity() {
         mediaPlayer?.isLooping = true
 
         // ajutar el volumen a lo que quiero
-        val volumen = 0.1f
+        val volumen = 0.3f
         mediaPlayer?.setVolume(volumen, volumen)
 
     }

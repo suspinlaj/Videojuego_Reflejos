@@ -30,9 +30,17 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private val listaSlimesMal = ArrayList<Bitmap>()
     private var slimeActual: Bitmap? = null
     private val margenSlime = 100
+
     val margenSuperior = 200   //respetar barra de corazones
     val margenLateral = 50
     private var slimeActualEsEspecial = false
+
+    data class ManchaSlime(
+        val bitmap: Bitmap,
+        val x: Float,
+        val y: Float,
+        val tiempoGolpe: Long
+    )
     
     private var gameOver = false
 
@@ -57,8 +65,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var radio = 100f // Tamaño figura
 
     private var indiceSlimeActual: Int = -1 //  número de slime de la lista
-    private var slimeGolpeado = false       // si está en la animación de morir
-    private var tiempoGolpe: Long = 0       // segundo de espera
+    private val listaManchas = ArrayList<ManchaSlime>()
 
     // TIEMPO
     private var tiempoAparicion: Long = 0  // tiempo aparición slime actual
@@ -98,6 +105,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var soundPool: SoundPool? = null
     private var sonidoEspecialId: Int = 0
     private var sonidoPerderId: Int = 0
+    private var sonidoCuentaAtras: Int = 0
 
     // controlar la carga
     @Volatile
@@ -129,6 +137,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         // Cargar audios
         sonidoEspecialId = soundPool?.load(context, R.raw.victoria, 1) ?: 0
         sonidoPerderId = soundPool?.load(context, R.raw.derrota, 1) ?: 0
+        sonidoCuentaAtras = soundPool?.load(context, R.raw.cuentaatras, 1) ?: 0
 
     }
 
@@ -262,6 +271,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                 numeroCuentaAtras--
                 tiempoCambioNumero = tiempoActual // resetear el reloj
 
+
                 if (numeroCuentaAtras <= 0) {
                     enCuentaAtras = false //quitar cuenta atrás
                     juegoIniciado = true  // empezar juego
@@ -275,19 +285,15 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         // para esperar a que el jugador ponga el nombre
         if (!juegoIniciado) return
 
-        // comprobar slime aplastado
-        if (slimeGolpeado) {
-            val tiempoActual = System.currentTimeMillis()
-            if (tiempoActual - tiempoGolpe > 1000) {
-                generarNuevoSlime()
-            }
-            return
-        }
+        // Borrar la img del aplastado
+        val tiempoActual = System.currentTimeMillis()
+        listaManchas.removeAll { tiempoActual - it.tiempoGolpe > 1500 }
 
         // generar slimes
         if (slimeActual == null && width > 0 && height > 0) {
             generarNuevoSlime()
         }
+
 
         // comprobar tiempo que se tarda en pulsar
         if (slimeActual != null) {
@@ -330,22 +336,23 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
         tiempoCambioNumero = System.currentTimeMillis() // resetear reloj para que no me mate nada más empezar
 
         juegoIniciado = false
+
+        soundPool?.play(sonidoCuentaAtras, 1f, 1f, 0, 0, 1f)
     }
 
     // Generar un slime y su posicion aleatoria
     private fun generarNuevoSlime() {
-        slimeGolpeado = false
         val probabilidadEspecial = 5
 
         // probabilidad de que salga slime especial
         val esEspecial = (0..99).random() < probabilidadEspecial
         slimeActualEsEspecial = esEspecial
 
-        slimeActual = (if (esEspecial) {
+        if (esEspecial) {
             indiceSlimeActual = -1
             // SLIME ESPECIAL
             val bmp = BitmapFactory.decodeResource(resources, R.drawable.slimeespecialbien)
-            bmp.scale(180, 150, false)
+            slimeActual = bmp.scale(180, 150, false)
         } else {
             // SLIME NORMAL
             if (listaSlimesBien.isEmpty()) return
@@ -353,7 +360,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             // guardar indice
             indiceSlimeActual = (Math.random() * listaSlimesBien.size).toInt()
             slimeActual = listaSlimesBien[indiceSlimeActual]
-        }) as Bitmap?
+        }
 
         // Posición aleatoria
         slimeActual?.let { bmp ->
@@ -442,19 +449,23 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
             surfaceHolder.unlockCanvasAndPost(canvas)
             return
         }
+                /// slimes aplastados
+                for (mancha in listaManchas) {
+                    canvas.drawBitmap(mancha.bitmap, mancha.x, mancha.y, null)
+                }
 
-            // poner slime encima del fondo
-            slimeActual?.let { bitmap ->
-                canvas.drawBitmap(bitmap, figuraX, figuraY, null)
+                // slime vivo
+                slimeActual?.let { bitmapVivo ->
+                    canvas.drawBitmap(bitmapVivo, figuraX, figuraY, null)
+                }
+
+                surfaceHolder.unlockCanvasAndPost(canvas)
             }
-
-            surfaceHolder.unlockCanvasAndPost(canvas)
-        }
     }
 
     // click en la pantalla
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!juegoIniciado || slimeGolpeado) return true
+        if (!juegoIniciado) return true
 
         if (event.action == MotionEvent.ACTION_DOWN) {
             val dedoX = event.x
@@ -479,17 +490,23 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                         soundPool?.play(sonidoEspecialId, 1f, 1f, 0, 0, 1f)
                     }
 
-                    slimeGolpeado = true
-                    tiempoGolpe = System.currentTimeMillis()
+                    // crear aplastado y añadir a lista
+                    val tiempoGolpeActual = System.currentTimeMillis()
+                    var bmpAplastado: Bitmap? = null
 
                     if (slimeActualEsEspecial) {
                         val bmp = BitmapFactory.decodeResource(resources, R.drawable.slimeespecialmal)
-                        slimeActual = bmp.scale(180, 150, false)
+                        bmpAplastado = bmp.scale(180, 150, false)
                     } else {
                         // Buscar mismo slime que estaba bien, pero en la lista mal
                         if (indiceSlimeActual != -1 && indiceSlimeActual < listaSlimesMal.size) {
-                            slimeActual = listaSlimesMal[indiceSlimeActual]
+                            bmpAplastado = listaSlimesMal[indiceSlimeActual]
                         }
+                    }
+
+                    // guardar imagen aplastadaen la lista
+                    if (bmpAplastado != null) {
+                        listaManchas.add(ManchaSlime(bmpAplastado, figuraX, figuraY, tiempoGolpeActual))
                     }
 
                     contadorAciertos++
@@ -498,10 +515,11 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
                     if (contadorAciertos >= aciertosSubirNivel) {
                         // Reducir tiempo
                         if (tiempoLimite > tiempoMinimo) {
-                            tiempoLimite -= (tiempoLimite * reduccionTiempo) / 100
+                            tiempoLimite -= reduccionTiempo
                             contadorAciertos = 0
                         }
                     }
+                    generarNuevoSlime()
                 }
             }
         }
