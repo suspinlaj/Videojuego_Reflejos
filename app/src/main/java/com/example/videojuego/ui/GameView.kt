@@ -15,6 +15,7 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import androidx.core.graphics.scale
 import com.example.videojuego.R
+import java.util.concurrent.CopyOnWriteArrayList
 
 class GameView(context: Context) : SurfaceView(context), Runnable{
 
@@ -65,7 +66,7 @@ class GameView(context: Context) : SurfaceView(context), Runnable{
     private var radio = 100f // Tamaño figura
 
     private var indiceSlimeActual: Int = -1 //  número de slime de la lista
-    private val listaManchas = ArrayList<ManchaSlime>()
+    private val listaManchas = CopyOnWriteArrayList<ManchaSlime>() // para que no me crashee
 
     // TIEMPO
     private var tiempoAparicion: Long = 0  // tiempo aparición slime actual
