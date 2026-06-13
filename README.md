@@ -27,10 +27,10 @@ Finalizado. Proyecto educativo que cumple con creces los requisitos de programac
 <br><br><br>
 <p align="center">
   <img src="https://github.com/user-attachments/assets/291e5cba-5690-4562-8614-3320a2c2671e" width="200" alt="Pantalla Principal" />
-  &nbsp;&nbsp;
+  &nbsp;
   <img src="https://github.com/user-attachments/assets/a9183dcb-c50c-4aa8-ac5f-4a4f29a6616f" width="200" alt="Instrucciones" />
-  &nbsp;&nbsp;
+  &nbsp;
   <img src="https://github.com/user-attachments/assets/e474397b-7758-4bad-a073-3d05c03f5c0c" width="200" alt="Pantalla de Juego / Top" />
-  &nbsp;&nbsp;
+  &nbsp;
   <img src="https://github.com/user-attachments/assets/6c60772f-7a6e-45ee-ab74-54cedf804100" width="200" alt="Game Over" />
 </p>
