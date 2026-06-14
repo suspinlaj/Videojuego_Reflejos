@@ -49,3 +49,5 @@ El proyecto cuenta con un manual detallado donde se explica el funcionamiento de
   &nbsp;&nbsp;
   <img src="https://github.com/user-attachments/assets/6c60772f-7a6e-45ee-ab74-54cedf804100" width="200" alt="Game Over" />
 </p>
+
+```
