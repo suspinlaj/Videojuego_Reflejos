@@ -28,16 +28,12 @@ Finalizado. Proyecto educativo que cumple con creces los requisitos de programac
 
 El proyecto cuenta con un manual detallado donde se explica el funcionamiento de la aplicación, las mecánicas de juego y la guía de usuario.
 
+<br>
+
 <p align="center">
   <a href="https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf" target="_blank">
     <img src="https://img.shields.io/badge/Leer%20Manual%20de%20Usuario-PDF-red?style=for-the-badge&logo=adobeacademicreview" alt="Leer Manual" />
   </a>
-</p>
-
-<p align="center">
-  <object data="https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf" type="application/pdf" width="100%" height="600px">
-    <p>Tu navegador no soporta la visualización de PDFs integrados. Puedes ver el documento pulsando en el botón superior.</p>
-  </object>
 </p>
 
 <br><br>
