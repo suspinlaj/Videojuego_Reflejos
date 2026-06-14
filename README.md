@@ -32,7 +32,7 @@ El proyecto cuenta con un manual detallado donde se explica el funcionamiento de
 
 <p align="center">
   <a href="https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf" target="_blank">
-    <img src="https://img.shields.io/badge/Leer%20Manual%20de%20Usuario-PDF-red?style=for-the-badge&logo=adobeacademicreview" alt="Leer Manual" />
+    <img src="https://img.shields.io/badge/Leer%20Manual%20de%20Usuario-PDF-red?style=for-the-badge&logo=adobeacademicreview" alt="Descargar Manual" />
   </a>
 </p>
 
