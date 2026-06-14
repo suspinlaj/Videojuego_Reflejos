@@ -18,7 +18,7 @@ Este proyecto es el resultado práctico de la asignatura **Programación multime
 
 - **Lenguaje**: Kotlin
 - **Entorno de pruebas / Emulador**: Medium Phone
-- **Enfoque destacado**: Lógica de videojuegos en Android, animaciones programadas, integración de sistema de audio y persistencia de datos locales.
+- **Enfoque destacado**: Lógica de videojuegos en Android, animaciones programadas, integración de sistema de audio y persistencia de datos locales
 
 ## ⚙️ **Estado del proyecto**
 
