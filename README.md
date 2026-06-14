@@ -18,22 +18,38 @@ Este proyecto es el resultado práctico de la asignatura **Programación multime
 
 - **Lenguaje**: Kotlin
 - **Entorno de pruebas / Emulador**: Medium Phone
-- **Enfoque destacado**: Lógica de videojuegos en Android, animaciones programadas, integración de sistema de audio y persistencia de datos locales
+- **Enfoque destacado**: Lógica de videojuegos en Android, animaciones programadas, integración de sistema de audio y persistencia de datos locales.
 
 ## ⚙️ **Estado del proyecto**
 
 Finalizado. Proyecto educativo que cumple con creces los requisitos de programación multimedia, ofreciendo una experiencia de usuario (UX) interactiva, pulida y funcional.
 
-<br><br><br>
+## 📄 **Documentación y Manual de Usuario**
+
+El proyecto cuenta con un manual detallado donde se explica el funcionamiento de la aplicación, las mecánicas de juego y la guía de usuario.
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/291e5cba-5690-4562-8614-3320a2c2671e" width="200" alt="Pantalla Principal" />
-  &nbsp;
-  <img src="https://github.com/user-attachments/assets/a9183dcb-c50c-4aa8-ac5f-4a4f29a6616f" width="200" alt="Instrucciones" />
-  &nbsp;
-  <img src="https://github.com/user-attachments/assets/e474397b-7758-4bad-a073-3d05c03f5c0c" width="200" alt="Pantalla de Juego / Top" />
-  &nbsp;
-  <img src="https://github.com/user-attachments/assets/6c60772f-7a6e-45ee-ab74-54cedf804100" width="200" alt="Game Over" />
+  <a href="https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf" target="_blank">
+    <img src="https://img.shields.io/badge/Leer%20Manual%20de%20Usuario-PDF-red?style=for-the-badge&logo=adobeacademicreview" alt="Leer Manual" />
+  </a>
 </p>
 
-[Manual Usuario Slimash - Susana Pineros.pdf](https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf)
+<p align="center">
+  <object data="https://github.com/user-attachments/files/28925421/Manual.Usuario.Slimash.-.Susana.Pineros.pdf" type="application/pdf" width="100%" height="600px">
+    <p>Tu navegador no soporta la visualización de PDFs integrados. Puedes ver el documento pulsando en el botón superior.</p>
+  </object>
+</p>
 
+<br><br>
+
+## 📸 **Capturas de Pantalla**
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/291e5cba-5690-4562-8614-3320a2c2671e" width="200" alt="Pantalla Principal" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/a9183dcb-c50c-4aa8-ac5f-4a4f29a6616f" width="200" alt="Instrucciones" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/e474397b-7758-4bad-a073-3d05c03f5c0c" width="200" alt="Pantalla de Juego / Top" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/6c60772f-7a6e-45ee-ab74-54cedf804100" width="200" alt="Game Over" />
+</p>
